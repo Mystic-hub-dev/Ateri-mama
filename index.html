@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>A Quick Quiz For You ❤️</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+    body { 
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+      text-align: center; 
+      padding: 40px 20px; 
+      background-color: #ffe6e6; 
+      min-height: 100vh;
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      overflow-x: hidden;
+    }
+    .card {
+      background: white;
+      padding: 30px 20px;
+      border-radius: 16px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+      max-width: 400px;
+      width: 100%;
+      position: relative;
+    }
+    h1 {
+      font-size: 22px;
+      color: #333;
+      margin-bottom: 25px;
+      min-height: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .btn-container {
+      display: flex;
+      justify-content: center;
+      gap: 15px;
+      min-height: 50px;
+      align-items: center;
+    }
+    button { 
+      font-size: 16px; 
+      font-weight: bold;
+      padding: 12px 24px; 
+      border-radius: 25px; 
+      border: none; 
+      cursor: pointer; 
+      transition: transform 0.1s ease;
+    }
+    button:active {
+      transform: scale(0.95);
+    }
+    #yesBtn { 
+      background-color: #ff4b5c; 
+      color: white; 
+    }
+    #noBtn { 
+      background-color: #6c757d; 
+      color: white; 
+    }
+    /* Fixed absolute positioning for runaway effect */
+    .runaway {
+      position: absolute !important;
+      transition: all 0.15s ease-out;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="card" id="card">
+    <h1 id="question">Are you missing me right now? 🙈</h1>
+    
+    <div class="btn-container">
+      <button id="yesBtn" onclick="handleAnswer('yes')">Yes!</button>
+      <button id="noBtn" onclick="handleAnswer('no')">No</button>
+    </div>
+  </div>
+
+  <script>
+    // List of questions and configurations
+    const quizData = [
+      {
+        question: "Are you missing me right now? 🙈",
+        yesMsg: "I knew it! 🥰 Let's keep going...",
+        runawayNo: true // Makes "No" dodge the user
+      },
+      {
+        question: "Who is the boss in this relationship? 😎",
+        yesText: "You 👑",
+        noText: "Me 😼",
+        yesMsg: "Correct answer! Wise choice. 😉",
+        noMsg: "Nice try! But you know the truth. 😜",
+        runawayNo: false
+      },
+      {
+        question: "Are you going to buy me food next time we meet? 🍕🍔",
+        yesText: "Of course! ❤️",
+        noText: "No way 🙅‍♀️",
+        yesMsg: "Yay! You're the best! 😋",
+        runawayNo: true // "No" dodges again!
+      },
+      {
+        question: "Be honest... am I your favorite person? 🥺",
+        yesText: "Yes 💯",
+        noText: "Maybe... 😏",
+        yesMsg: "Aww! You are mine too! ❤️",
+        noMsg: "I'll take 'Maybe' as a YES! 🙈",
+        runawayNo: false
+      },
+      {
+        question: "Final Question: Do you love me? ❤️",
+        yesText: "YES! 💕",
+        noText: "NO 😜",
+        yesMsg: "I love you more! 😘",
+        runawayNo: true // Impossible to say No
+      }
+    ];
+
+    let currentStep = 0;
+
+    const qEl = document.getElementById('question');
+    const yesBtn = document.getElementById('yesBtn');
+    const noBtn = document.getElementById('noBtn');
+
+    // Attach event listeners for runaway behavior (both click/touch and hover)
+    noBtn.addEventListener('mouseenter', moveNoButton);
+    noBtn.addEventListener('touchstart', moveNoButton);
+
+    function loadQuestion() {
+      const current = quizData[currentStep];
+      
+      // Reset button positions and styling
+      noBtn.classList.remove('runaway');
+      noBtn.style.left = '';
+      noBtn.style.top = '';
+
+      // Set Texts
+      qEl.innerText = current.question;
+      yesBtn.innerText = current.yesText || "Yes!";
+      noBtn.innerText = current.noText || "No";
+
+      if (current.runawayNo) {
+        noBtn.classList.add('runaway');
+      }
+    }
+
+    function moveNoButton() {
+      if (!quizData[currentStep].runawayNo) return;
+
+      const card = document.getElementById('card');
+      const cardRect = card.getBoundingClientRect();
+
+      // Keep the button within the visible boundaries of the card
+      const maxX = cardRect.width - noBtn.offsetWidth - 20;
+      const maxY = cardRect.height - noBtn.offsetHeight - 20;
+
+      const randomX = Math.max(10, Math.floor(Math.random() * maxX));
+      const randomY = Math.max(10, Math.floor(Math.random() * maxY));
+
+      noBtn.style.left = randomX + 'px';
+      noBtn.style.top = randomY + 'px';
+    }
+
+    function handleAnswer(answer) {
+      const current = quizData[currentStep];
+
+      if (answer === 'yes') {
+        alert(current.yesMsg);
+      } else if (answer === 'no' && !current.runawayNo) {
+        alert(current.noMsg || "Wrong answer! 😉");
+      }
+
+      currentStep++;
+
+      if (currentStep < quizData.length) {
+        loadQuestion();
+      } else {
+        // Ending state
+        document.getElementById('card').innerHTML = `
+          <h1>You completed the quiz! 🎉</h1>
+          <p style="font-size: 18px; color: #555;">Send me a screenshot to claim your reward! ❤️</p>
+        `;
+      }
+    }
+
+    // Initialize first question
+    loadQuestion();
+  </script>
+
+</body>
+</html>
